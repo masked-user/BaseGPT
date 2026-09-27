@@ -63,42 +63,13 @@ class Attention(nn.Module): # Multi-Head Self Attention (MHSA) layer (causal sel
 
 
         attn = attn.masked_fill(self.mask[:,:,:T,:T] == 0 , float('-inf')) #mask future tokens in the attention scores
-        print("BEFORE SOFTMAX")
-        print("shape:", attn.shape)
-        print("dtype:", attn.dtype)
-
-        print("has NaN:", torch.isnan(attn).any().item())
-        print("has +inf:", torch.isposinf(attn).any().item())
-        print("has -inf:", torch.isneginf(attn).any().item())
-
-        finite = torch.isfinite(attn)
-
-        print("number finite:", finite.sum().item())
-        print("total values:", attn.numel())
-
-        if finite.any():
-            print("finite min:", attn[finite].min().item())
-            print("finite max:", attn[finite].max().item())
-        # Check whether any row has at least one finite value
-        row_has_finite = torch.isfinite(attn).any(dim=-1)
-
-        print("rows with no finite values:",
-            (~row_has_finite).sum().item())
 
         attn = F.softmax(attn,dim=1) #apply softmax to get attention weights
 
 
         test = F.softmax(attn, dim=-1)
 
-        print("test softmax NaN:", torch.isnan(test).any().item())
-        print("test softmax finite:", torch.isfinite(test).all().item())
-        print("test row 0:", test[0, 0, 0])
-        print("test row 0 sum:", test[0, 0, 0].sum())
 
-
-
-        print("softmax:", torch.isfinite(attn).all().item())
-        print("softmax NaN:", torch.isnan(attn).any().item())
         attn = self.attn_drop(attn) #apply dropout to attention weights
 
         
